@@ -1,11 +1,8 @@
 import mysql from "mysql2/promise";
 
-const db = mysql.createPool({
+export const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "",
-  database: "projectdm",
-  port: 3306, 
+  password: "", // ใส่รหัสผ่าน mysql ของคุณ
+  database: "projectdm", // ชื่อ database ที่สร้างไว้
 });
-
-export default db;
