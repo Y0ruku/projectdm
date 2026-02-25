@@ -16,7 +16,7 @@ export default function AboutPage() {
         <h1 className="text-2xl font-bold mb-4">เกี่ยวกับเรา</h1>
 
         <p className="text-gray-600">
-          MyShop คือระบบจัดการร้านค้าออนไลน์
+          Baan Gas คือระบบจัดการร้านค้าออนไลน์
           ที่ออกแบบมาให้ใช้งานง่าย สะดวก และรวดเร็ว
         </p>
       </div>

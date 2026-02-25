@@ -12,7 +12,7 @@ export default async function HomePage() {
       <aside className="w-64 bg-white border-r border-gray-200 shadow-sm flex flex-col">
         <div className="px-6 py-5 border-b border-gray-200">
           <h1 className="text-xl font-semibold text-gray-900">
-            MyShop
+            Bann Gas
           </h1>
           <p className="text-xs text-gray-400">Management System</p>
         </div>
@@ -122,7 +122,7 @@ export default async function HomePage() {
 
         {/* ================= FOOTER ================= */}
         <footer className="bg-white border-t border-gray-200 text-center py-4 text-gray-400 text-sm">
-          © 2026 MyShop. All rights reserved.
+          © 2026 Baan Gas. All rights reserved.
         </footer>
 
       </div>
