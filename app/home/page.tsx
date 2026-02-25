@@ -1,27 +1,97 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import StockModal from "../components/StockModal";
+import SettingsDropdown from "../components/SettingsDropdown";
 
-export default async function HomePage() {
-  const [rows] = await db.execute("SELECT * FROM categories");
-  const categories = rows as any[];
+export const dynamic = "force-dynamic";
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams?: { search?: string };
+}) {
+  const search = searchParams?.search || "";
+
+  // ======================
+  // UPDATE STOCK
+  // ======================
+  async function updateStock(formData: FormData) {
+    "use server";
+
+    const productId = Number(formData.get("productId"));
+    const amount = Number(formData.get("amount"));
+    const type = formData.get("type");
+
+    if (!productId || !amount || amount <= 0) {
+      redirect("/home");
+    }
+
+    if (type === "increase") {
+      await db.execute(
+        "UPDATE products SET stock = stock + ? WHERE id = ?",
+        [amount, productId]
+      );
+    } else {
+      await db.execute(
+        `UPDATE products 
+         SET stock = GREATEST(stock - ?, 0)
+         WHERE id = ?`,
+        [amount, productId]
+      );
+    }
+
+    redirect("/home");
+  }
+
+  // ======================
+  // LOGOUT (แก้ error แล้ว)
+  // ======================
+  async function logout() {
+    "use server";
+
+    const cookieStore = await cookies(); // ✅ ต้อง await
+    cookieStore.delete("token"); // เปลี่ยนชื่อให้ตรงกับระบบคุณ
+
+    redirect("/");
+  }
+
+  // ======================
+  // CATEGORIES
+  // ======================
+  const [catRows] = await db.execute("SELECT * FROM categories");
+  const categories = catRows as any[];
+
+  // ======================
+  // PRODUCTS
+  // ======================
+  let productQuery = "SELECT * FROM products";
+  let values: any[] = [];
+
+  if (search) {
+    productQuery += " WHERE product_name LIKE ?";
+    values.push(`%${search}%`);
+  }
+
+  const [productRows] = await db.execute(productQuery, values);
+  const products = productRows as any[];
 
   return (
     <div className="min-h-screen flex bg-gray-100 text-gray-800">
-
-      {/* ================= SIDEBAR ================= */}
-      <aside className="w-64 bg-white border-r border-gray-200 shadow-sm flex flex-col">
-        <div className="px-6 py-5 border-b border-gray-200">
-          <h1 className="text-xl font-semibold text-gray-900">
-            Bann Gas
-          </h1>
-          <p className="text-xs text-gray-400">Management System</p>
+      {/* SIDEBAR */}
+      <aside className="w-64 bg-white border-r shadow-sm flex flex-col">
+        <div className="px-6 py-5 border-b">
+          <h1 className="text-xl font-semibold">Bann Gas</h1>
+          <p className="text-xs text-gray-400">
+            Management System
+          </p>
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-2 text-sm">
-          {/* ✅ กลับไปหน้า home */}
           <Link
             href="/home"
-            className="block px-4 py-2 rounded-lg hover:bg-gray-100 transition"
+            className="block px-4 py-2 rounded-lg bg-gray-200 font-medium"
           >
             Dashboard
           </Link>
@@ -34,7 +104,7 @@ export default async function HomePage() {
             {categories.map((cat) => (
               <Link
                 key={cat.id}
-                href={`/products?category=${cat.id}`}
+                href={`/products/${cat.id}`}
                 className="block px-4 py-2 rounded-lg hover:bg-gray-100 transition"
               >
                 {cat.category_name}
@@ -50,81 +120,90 @@ export default async function HomePage() {
           </Link>
         </nav>
 
-        <div className="px-6 py-4 border-t border-gray-200 text-sm text-gray-500">
+        <div className="px-6 py-4 border-t text-sm text-gray-500">
           Logged in as Admin
         </div>
       </aside>
 
-      {/* ================= RIGHT SIDE ================= */}
+      {/* RIGHT SIDE */}
       <div className="flex-1 flex flex-col">
+        {/* HEADER */}
+        <header className="bg-white border-b shadow-sm px-8 py-4 flex justify-between items-center">
+          <h2 className="text-lg font-medium">Dashboard</h2>
 
-        {/* ================= TOPBAR ================= */}
-        <header className="bg-white border-b border-gray-200 shadow-sm px-8 py-4 flex justify-between items-center">
-
-          <h2 className="text-lg font-medium text-gray-900">
-            Dashboard
-          </h2>
-
-          {/* SETTINGS DROPDOWN */}
-          <div className="relative group">
-            <button className="p-2 rounded-full hover:bg-gray-100 transition">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-5 h-5 text-gray-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M11.983 5.5a1.5 1.5 0 012.034 0l.567.567a1.5 1.5 0 001.06.44h.802a1.5 1.5 0 011.5 1.5v.802a1.5 1.5 0 00.44 1.06l.567.567a1.5 1.5 0 010 2.034l-.567.567a1.5 1.5 0 00-.44 1.06v.802a1.5 1.5 0 01-1.5 1.5h-.802a1.5 1.5 0 00-1.06.44l-.567.567a1.5 1.5 0 01-2.034 0l-.567-.567a1.5 1.5 0 00-1.06-.44h-.802a1.5 1.5 0 01-1.5-1.5v-.802a1.5 1.5 0 00-.44-1.06l-.567-.567a1.5 1.5 0 010-2.034l.567-.567a1.5 1.5 0 00.44-1.06v-.802a1.5 1.5 0 011.5-1.5h.802a1.5 1.5 0 001.06-.44l.567-.567z"
-                />
-                <circle cx="12" cy="12" r="3" strokeWidth={2} />
-              </svg>
-            </button>
-
-            {/* ✅ เหลือแค่ออกจากระบบ */}
-            <div className="absolute right-0 mt-3 w-40 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-
-              <Link
-                href="/"
-                className="block px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition"
-              >
-                ออกจากระบบ
-              </Link>
-
-            </div>
-          </div>
-
+          {/* ปุ่มเฟือง */}
+          <SettingsDropdown logoutAction={logout} />
         </header>
 
-        {/* ================= CONTENT ================= */}
+        {/* MAIN */}
         <main className="flex-1 p-10">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              ช้อปง่าย ได้ของไว
-            </h2>
+          <form className="mb-8">
+            <input
+              type="text"
+              name="search"
+              placeholder="ค้นหาสินค้า..."
+              defaultValue={search}
+              className="w-full md:w-1/2 p-3 border rounded-lg"
+            />
+          </form>
 
-            <p className="text-gray-500 mb-6 max-w-xl mx-auto">
-              พบกับสินค้าคุณภาพดี ราคาคุ้มค่า พร้อมโปรโมชั่นพิเศษทุกวัน
+          <h3 className="text-xl font-semibold mb-6">
+            {search
+              ? `ผลการค้นหา: "${search}"`
+              : "สินค้าทั้งหมด"}
+          </h3>
+
+          {products.length === 0 && (
+            <p className="text-gray-500">
+              ไม่พบสินค้า
             </p>
+          )}
 
-            <Link
-              href="/products"
-              className="inline-block bg-black text-white px-6 py-3 rounded-full hover:bg-gray-800 transition"
-            >
-              เริ่มช้อปเลย
-            </Link>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {products.map((product) => (
+              <div
+                key={product.id}
+                className="bg-white p-5 rounded-xl shadow-sm border"
+              >
+                <h4 className="font-semibold text-lg">
+                  {product.product_name}
+                </h4>
+
+                <p className="text-gray-500 mt-2">
+                  ราคา: {product.price} บาท
+                </p>
+
+                <p
+                  className={`mt-2 font-medium ${
+                    product.stock > 0
+                      ? "text-green-600"
+                      : "text-red-500"
+                  }`}
+                >
+                  คงเหลือ: {product.stock} ชิ้น
+                </p>
+
+                <div className="flex gap-3 mt-4">
+                  <StockModal
+                    product={product}
+                    actionType="decrease"
+                    serverAction={updateStock}
+                  />
+
+                  <StockModal
+                    product={product}
+                    actionType="increase"
+                    serverAction={updateStock}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
         </main>
 
-        {/* ================= FOOTER ================= */}
-        <footer className="bg-white border-t border-gray-200 text-center py-4 text-gray-400 text-sm">
+        <footer className="bg-white border-t text-center py-4 text-gray-400 text-sm">
           © 2026 Baan Gas. All rights reserved.
         </footer>
-
       </div>
     </div>
   );
