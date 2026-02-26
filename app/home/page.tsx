@@ -46,13 +46,13 @@ export default async function HomePage({
   }
 
   // ======================
-  // LOGOUT (แก้ error แล้ว)
+  // LOGOUT
   // ======================
   async function logout() {
     "use server";
 
-    const cookieStore = await cookies(); // ✅ ต้อง await
-    cookieStore.delete("token"); // เปลี่ยนชื่อให้ตรงกับระบบคุณ
+    const cookieStore = await cookies();
+    cookieStore.delete("token");
 
     redirect("/");
   }
@@ -89,11 +89,20 @@ export default async function HomePage({
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-2 text-sm">
+          {/* Dashboard */}
           <Link
             href="/home"
             className="block px-4 py-2 rounded-lg bg-gray-200 font-medium"
           >
             Dashboard
+          </Link>
+
+          {/* เพิ่มหน้าจ่ายเงิน */}
+          <Link
+            href="/payment"
+            className="block px-4 py-2 rounded-lg hover:bg-gray-100 transition"
+          >
+            จ่ายเงิน
           </Link>
 
           <div className="mt-4">
@@ -130,13 +139,23 @@ export default async function HomePage({
         {/* HEADER */}
         <header className="bg-white border-b shadow-sm px-8 py-4 flex justify-between items-center">
           <h2 className="text-lg font-medium">Dashboard</h2>
-
-          {/* ปุ่มเฟือง */}
           <SettingsDropdown logoutAction={logout} />
         </header>
 
         {/* MAIN */}
         <main className="flex-1 p-10">
+
+          {/* ปุ่มไปหน้าจ่ายเงิน */}
+          <div className="mb-6 flex justify-end">
+            <Link
+              href="/payment"
+              className="bg-green-600 text-white px-5 py-2 rounded-lg shadow hover:bg-green-700 transition"
+            >
+              + ไปหน้าจ่ายเงิน
+            </Link>
+          </div>
+
+          {/* SEARCH */}
           <form className="mb-8">
             <input
               type="text"
