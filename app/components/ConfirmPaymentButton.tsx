@@ -6,36 +6,35 @@ import Image from "next/image";
 export default function ConfirmPaymentButton() {
   const [open, setOpen] = useState(false);
   const [method, setMethod] = useState<"cash" | "qr" | null>(null);
-  const [cashReceived, setCashReceived] = useState<string>("");
-  const [error, setError] = useState<string>("");
+  const [cashReceived, setCashReceived] = useState("");
+  const [error, setError] = useState("");
+  const [total, setTotal] = useState(0);
 
-  const total = 0;
-
-  const change =
-    cashReceived !== "" ? Number(cashReceived) - total : 0;
-
-  const isCashValid =
-    method === "cash"
-      ? cashReceived !== "" && Number(cashReceived) >= total
-      : true;
-
-  function checkHasProductSelected() {
+  function calculateTotal() {
     const quantityInputs = document.querySelectorAll(
-      'input[name="quantity"]'
+      'input[name*="[quantity]"]'
     );
 
-    for (let input of quantityInputs) {
-      const value = Number((input as HTMLInputElement).value);
-      if (value > 0) return true;
-    }
+    let sum = 0;
 
-    return false;
+    quantityInputs.forEach((input) => {
+      const element = input as HTMLInputElement;
+      const qty = Number(element.value);
+      const price = Number(element.dataset.price || 0);
+
+      if (qty > 0 && price > 0) {
+        sum += qty * price;
+      }
+    });
+
+    setTotal(sum);
+    return sum;
   }
 
   function handleOpen() {
-    const hasProduct = checkHasProductSelected();
+    const sum = calculateTotal();
 
-    if (!hasProduct) {
+    if (sum <= 0) {
       setError("กรุณาเลือกสินค้าอย่างน้อย 1 รายการ");
       return;
     }
@@ -50,41 +49,55 @@ export default function ConfirmPaymentButton() {
     setCashReceived("");
   }
 
+  const change =
+    cashReceived !== "" ? Number(cashReceived) - total : 0;
+
+  const isCashValid =
+    method === "cash"
+      ? cashReceived !== "" && Number(cashReceived) >= total
+      : true;
+
   return (
     <>
-      {/* แสดง error ถ้าไม่มีสินค้า */}
       {error && (
         <div className="text-red-500 text-sm mb-3">
           {error}
         </div>
       )}
 
-      {/* ปุ่มเปิด popup */}
       <button
         type="button"
         onClick={handleOpen}
-        className="bg-green-600 text-white px-6 py-3 rounded-lg shadow hover:bg-green-700"
+        className="bg-green-600 text-white px-6 py-3 rounded-xl shadow-md hover:bg-green-700 transition"
       >
         ยืนยันการชำระเงิน
       </button>
 
-      {/* POPUP */}
       {open && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-          <div className="bg-white w-[420px] rounded-xl shadow-2xl p-6">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8">
 
-            <h2 className="text-xl font-semibold text-center mb-4">
-              เลือกวิธีชำระเงิน
+            <h2 className="text-2xl font-semibold text-center mb-6">
+              ชำระเงิน
             </h2>
 
-            <div className="flex gap-3 mb-6">
+            <div className="bg-gray-100 rounded-xl p-5 mb-6">
+              <div className="flex justify-between items-center text-lg font-semibold">
+                <span>ยอดรวมทั้งหมด</span>
+                <span className="text-green-600">
+                  {total.toLocaleString()} บาท
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-6">
               <button
                 type="button"
                 onClick={() => setMethod("cash")}
-                className={`flex-1 py-2 rounded-lg border ${
+                className={`py-3 rounded-xl border transition ${
                   method === "cash"
-                    ? "bg-green-600 text-white border-green-600"
-                    : "bg-white"
+                    ? "bg-green-600 text-white border-green-600 shadow"
+                    : "bg-white hover:bg-gray-50"
                 }`}
               >
                 เงินสด
@@ -93,10 +106,10 @@ export default function ConfirmPaymentButton() {
               <button
                 type="button"
                 onClick={() => setMethod("qr")}
-                className={`flex-1 py-2 rounded-lg border ${
+                className={`py-3 rounded-xl border transition ${
                   method === "qr"
-                    ? "bg-green-600 text-white border-green-600"
-                    : "bg-white"
+                    ? "bg-green-600 text-white border-green-600 shadow"
+                    : "bg-white hover:bg-gray-50"
                 }`}
               >
                 สแกน QR
@@ -113,14 +126,14 @@ export default function ConfirmPaymentButton() {
                   type="number"
                   value={cashReceived}
                   onChange={(e) => setCashReceived(e.target.value)}
+                  className="w-full border rounded-lg p-3 mb-3 focus:ring-2 focus:ring-green-500 outline-none"
                   placeholder="กรอกจำนวนเงิน"
-                  className="w-full border rounded p-2 mb-3"
                 />
 
-                <div className="text-sm text-gray-700">
-                  เงินทอน:{" "}
+                <div className="flex justify-between text-sm">
+                  <span>เงินทอน</span>
                   <span className="font-semibold text-green-600">
-                    {change > 0 ? change : 0} บาท
+                    {change > 0 ? change.toLocaleString() : 0} บาท
                   </span>
                 </div>
 
@@ -134,35 +147,42 @@ export default function ConfirmPaymentButton() {
             )}
 
             {method === "qr" && (
-              <div className="text-center mb-6">
-                <p className="text-sm text-gray-600 mb-3">
-                  สแกนเพื่อชำระเงินผ่านพร้อมเพย์
-                </p>
+              <div className="mb-6 flex flex-col items-center">
+                <Image
+                  src="/qr.jpg"
+                  alt="QR Code"
+                  width={220}
+                  height={220}
+                  className="rounded-lg shadow-md"
+                />
 
-                <div className="flex justify-center">
-                  <Image
-                    src="/qr.jpg"
-                    alt="QR Code"
-                    width={200}
-                    height={200}
-                  />
+                <div className="text-center mt-4 space-y-1">
+                  <p className="text-green-600 font-medium">
+                    สแกน QR เพื่อโอนเข้าบัญชี
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    ชื่อบัญชี: บริษัท บ้านแก๊ส จำกัด
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    เลขบัญชี: xxx-x-xxxx-x
+                  </p>
                 </div>
               </div>
             )}
 
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-3 mt-4">
               <button
                 type="button"
                 onClick={handleClose}
-                className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+                className="px-5 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition"
               >
                 ยกเลิก
               </button>
 
               <button
                 type="submit"
-                disabled={!method || !isCashValid}
-                className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-400"
+                disabled={!method || !isCashValid || total <= 0}
+                className="px-5 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition disabled:bg-gray-400"
               >
                 ยืนยันชำระเงิน
               </button>

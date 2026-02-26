@@ -97,12 +97,20 @@ export default async function HomePage({
             Dashboard
           </Link>
 
-          {/* เพิ่มหน้าจ่ายเงิน */}
+          {/* จ่ายเงิน */}
           <Link
             href="/payment"
             className="block px-4 py-2 rounded-lg hover:bg-gray-100 transition"
           >
             จ่ายเงิน
+          </Link>
+
+          {/* 🔥 เพิ่มประวัติการจ่ายเงิน */}
+          <Link
+            href="/payment/history"
+            className="block px-4 py-2 rounded-lg hover:bg-gray-100 transition"
+          >
+            ประวัติการจ่ายเงิน
           </Link>
 
           <div className="mt-4">
