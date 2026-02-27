@@ -161,7 +161,7 @@ export default function ConfirmPaymentButton() {
                     สแกน QR เพื่อโอนเข้าบัญชี
                   </p>
                   <p className="text-sm text-gray-600">
-                    ชื่อบัญชี: บริษัท บ้านแก๊ส จำกัด
+                    ชื่อบัญชี: บริษัท Bann gas จำกัด
                   </p>
                   <p className="text-sm text-gray-600">
                     เลขบัญชี: xxx-x-xxxx-x
