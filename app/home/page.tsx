@@ -110,7 +110,7 @@ export default async function HomePage({
             href="/payment/history"
             className="block px-4 py-2 rounded-lg hover:bg-gray-100 transition"
           >
-            ประวัติการจ่ายเงิน
+            ยอดขาย
           </Link>
 
           <div className="mt-4">
