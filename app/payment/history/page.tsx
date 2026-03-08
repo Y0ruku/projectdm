@@ -60,7 +60,7 @@ export default async function PaymentHistoryPage() {
 
       {/* TITLE */}
       <h1 className="text-3xl font-bold mb-8">
-        ประวัติการขาย (POS)
+        ประวัติการขาย 
       </h1>
 
       {/* ======================

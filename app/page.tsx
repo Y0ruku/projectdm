@@ -34,7 +34,7 @@ export default function LoginPage() {
       <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-md border border-gray-200">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-semibold text-gray-900">
-            MyShop
+            Bann Gas
           </h1>
           <p className="text-sm text-gray-400 mt-1">
             เข้าสู่ระบบเพื่อใช้งาน
