@@ -17,6 +17,7 @@ export default function StockModal({
   actionType,
   serverAction,
 }: Props) {
+
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState(1);
   const [isPending, startTransition] = useTransition();
@@ -32,7 +33,6 @@ export default function StockModal({
     });
   };
 
-  // ป้องกันกรอกเกิน stock ตอนลด
   const handleAmountChange = (value: number) => {
     if (value < 1) value = 1;
 
@@ -45,14 +45,14 @@ export default function StockModal({
 
   return (
     <>
-      {/* ปุ่มเปิด Modal */}
+      {/* BUTTON */}
       <button
         onClick={() => {
           if (!isIncrease && isOutOfStock) return;
           setOpen(true);
         }}
         disabled={!isIncrease && isOutOfStock}
-        className={`px-3 py-1 rounded text-white font-semibold transition
+        className={`w-9 h-9 flex items-center justify-center rounded-lg text-white font-bold shadow transition
         ${
           isIncrease
             ? "bg-green-600 hover:bg-green-700"
@@ -63,60 +63,93 @@ export default function StockModal({
         {isIncrease ? "+" : "-"}
       </button>
 
-      {/* Modal */}
+      {/* MODAL */}
       {open && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-          <div className="bg-white p-6 rounded-xl shadow-xl w-80">
-            <h2 className="text-lg font-bold mb-2 text-center">
-              {isIncrease ? "เพิ่มสินค้า" : "ลดสินค้า"}
-            </h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
 
-            <p className="text-sm text-center mb-1">
-              {product.product_name}
-            </p>
+          <div className="bg-white w-96 rounded-2xl shadow-2xl p-6 animate-fadeIn">
 
-            <p className="text-xs text-gray-500 text-center mb-4">
-              คงเหลือ: {product.stock} ชิ้น
-            </p>
+            {/* HEADER */}
+            <div className="flex justify-between items-center mb-4">
 
-            <input
-              type="number"
-              min="1"
-              max={!isIncrease ? product.stock : undefined}
-              value={amount}
-              onChange={(e) =>
-                handleAmountChange(Number(e.target.value))
-              }
-              className="w-full border p-2 rounded mb-4"
-            />
+              <h2 className="text-lg font-semibold">
+                {isIncrease ? "เพิ่มสินค้า" : "ลดสินค้า"}
+              </h2>
 
-            {!isIncrease && amount > product.stock && (
-              <p className="text-red-500 text-xs mb-2 text-center">
-                จำนวนเกินสินค้าคงเหลือ
-              </p>
-            )}
-
-            <div className="flex justify-between gap-3">
-              {/* ยกเลิก */}
               <button
                 onClick={() => setOpen(false)}
-                className="w-full bg-gray-300 rounded py-2"
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+
+            </div>
+
+            {/* PRODUCT INFO */}
+            <div className="text-center mb-6">
+
+              <p className="font-medium text-lg">
+                {product.product_name}
+              </p>
+
+              <p className="text-sm text-gray-500 mt-1">
+                คงเหลือ {product.stock} ชิ้น
+              </p>
+
+            </div>
+
+            {/* INPUT */}
+            <div className="mb-5">
+
+              <label className="text-sm text-gray-600 mb-1 block">
+                จำนวน
+              </label>
+
+              <input
+                type="number"
+                min="1"
+                max={!isIncrease ? product.stock : undefined}
+                value={amount}
+                onChange={(e) =>
+                  handleAmountChange(Number(e.target.value))
+                }
+                className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+
+              {!isIncrease && amount > product.stock && (
+                <p className="text-red-500 text-xs mt-2">
+                  จำนวนเกินสินค้าคงเหลือ
+                </p>
+              )}
+
+            </div>
+
+            {/* BUTTONS */}
+            <div className="flex gap-3">
+
+              {/* CANCEL */}
+              <button
+                onClick={() => setOpen(false)}
+                className="w-full border rounded-lg py-2 hover:bg-gray-100 transition"
               >
                 ยกเลิก
               </button>
 
-              {/* ยืนยัน */}
+              {/* CONFIRM */}
               <form action={handleSubmit} className="w-full">
+
                 <input
                   type="hidden"
                   name="productId"
                   value={product.id}
                 />
+
                 <input
                   type="hidden"
                   name="amount"
                   value={amount}
                 />
+
                 <input
                   type="hidden"
                   name="type"
@@ -130,13 +163,17 @@ export default function StockModal({
                     amount < 1 ||
                     (!isIncrease && amount > product.stock)
                   }
-                  className="w-full bg-blue-600 text-white rounded py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-blue-600 text-white rounded-lg py-2 hover:bg-blue-700 transition disabled:opacity-50"
                 >
                   {isPending ? "กำลังบันทึก..." : "ยืนยัน"}
                 </button>
+
               </form>
+
             </div>
+
           </div>
+
         </div>
       )}
     </>

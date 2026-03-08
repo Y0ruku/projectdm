@@ -83,18 +83,22 @@ export default async function HomePage({
     <div className="min-h-screen flex bg-gray-100 text-gray-800">
 
       {/* SIDEBAR */}
-      <aside className="w-64 bg-white border-r shadow-sm flex flex-col">
-        <div className="px-6 py-5 border-b">
-          <h1 className="text-xl font-semibold">Bann Gas</h1>
+      <aside className="w-64 bg-white border-r shadow-lg flex flex-col">
+
+        <div className="px-6 py-6 border-b">
+          <h1 className="text-2xl font-bold text-green-600">
+            Bann Gas
+          </h1>
           <p className="text-xs text-gray-400">
             Management System
           </p>
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-2 text-sm">
+
           <Link
             href="/home"
-            className="block px-4 py-2 rounded-lg bg-gray-200 font-medium"
+            className="block px-4 py-2 rounded-lg bg-green-50 text-green-600 font-medium"
           >
             Dashboard
           </Link>
@@ -113,7 +117,7 @@ export default async function HomePage({
             ยอดขาย
           </Link>
 
-          <div className="mt-4">
+          <div className="mt-6">
             <p className="px-4 text-xs text-gray-400 uppercase mb-2">
               สินค้า
             </p>
@@ -135,59 +139,69 @@ export default async function HomePage({
           >
             เกี่ยวกับเรา
           </Link>
+
         </nav>
 
         <div className="px-6 py-4 border-t text-sm text-gray-500">
-          Logged in as Admin
+          Logged in as <span className="font-medium">Admin</span>
         </div>
+
       </aside>
 
       {/* RIGHT SIDE */}
       <div className="flex-1 flex flex-col">
 
         {/* HEADER */}
-        <header className="bg-white border-b shadow-sm px-8 py-4 flex justify-between items-center">
-          <h2 className="text-lg font-medium">Dashboard</h2>
+        <header className="bg-white border-b px-8 py-4 flex justify-between items-center">
+
+          <h2 className="text-xl font-semibold">
+            Dashboard
+          </h2>
+
           <SettingsDropdown logoutAction={logout} />
+
         </header>
 
         {/* MAIN */}
         <main className="flex-1 p-10">
 
-          {/* ปุ่มไปหน้าจ่ายเงิน */}
-          <div className="mb-6 flex justify-end">
+          {/* TOP BAR */}
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
+
+            <form method="GET" className="flex gap-3 w-full md:w-auto">
+
+              <input
+                type="text"
+                name="search"
+                placeholder="ค้นหาสินค้า..."
+                defaultValue={search}
+                className="w-full md:w-80 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+
+              <button
+                type="submit"
+                className="px-6 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
+              >
+                ค้นหา
+              </button>
+
+            </form>
+
             <Link
               href="/payment"
-              className="bg-green-600 text-white px-5 py-2 rounded-lg shadow hover:bg-green-700 transition"
+              className="bg-green-600 text-white px-6 py-3 rounded-lg shadow hover:bg-green-700 transition"
             >
               + ไปหน้าจ่ายเงิน
             </Link>
+
           </div>
 
-          {/* SEARCH */}
-          <form method="GET" className="mb-6 flex gap-3 items-center">
-            <input
-              type="text"
-              name="search"
-              placeholder="ค้นหาสินค้า..."
-              defaultValue={search}
-              className="w-full md:w-1/2 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-
-            <button
-              type="submit"
-              className="px-6 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
-            >
-              ค้นหา
-            </button>
-          </form>
-
           {/* TITLE */}
-          <h3 className="text-xl font-semibold mb-1">
+          <h3 className="text-2xl font-bold mb-1">
             {search ? "ผลการค้นหา" : "สินค้าทั้งหมด"}
           </h3>
 
-          <p className="text-sm text-gray-500 mb-6">
+          <p className="text-sm text-gray-500 mb-8">
             {search
               ? `คำค้นหา "${search}" • พบ ${products.length} รายการ`
               : `สินค้าทั้งหมด ${products.length} รายการ`}
@@ -200,18 +214,21 @@ export default async function HomePage({
           )}
 
           {/* PRODUCT GRID */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
             {products.map((product) => (
+
               <div
                 key={product.id}
-                className="bg-white p-5 rounded-xl shadow-sm border"
+                className="bg-white p-6 rounded-2xl shadow-sm border hover:shadow-lg transition"
               >
+
                 <h4 className="font-semibold text-lg">
                   {product.product_name}
                 </h4>
 
                 <p className="text-gray-500 mt-2">
-                  ราคา: {product.price} บาท
+                  ราคา {product.price} บาท
                 </p>
 
                 <p
@@ -221,10 +238,11 @@ export default async function HomePage({
                       : "text-red-500"
                   }`}
                 >
-                  คงเหลือ: {product.stock} ชิ้น
+                  คงเหลือ {product.stock} ชิ้น
                 </p>
 
-                <div className="flex gap-3 mt-4">
+                <div className="flex gap-3 mt-5">
+
                   <StockModal
                     product={product}
                     actionType="decrease"
@@ -236,15 +254,20 @@ export default async function HomePage({
                     actionType="increase"
                     serverAction={updateStock}
                   />
+
                 </div>
+
               </div>
+
             ))}
+
           </div>
 
         </main>
 
+        {/* FOOTER */}
         <footer className="bg-white border-t text-center py-4 text-gray-400 text-sm">
-          © 2026 Baan Gas. All rights reserved.
+          © 2026 Bann Gas Management System
         </footer>
 
       </div>
