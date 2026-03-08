@@ -146,17 +146,39 @@ export default async function PaymentPage() {
 
         <Link
           href="/payment"
-          className="block font-semibold text-green-600"
+          className="block mb-5 font-semibold text-green-600"
         >
           จ่ายเงิน
+        </Link>
+
+        {/* ปุ่มไปหน้ายอดขาย */}
+        <Link
+          href="/payment/history"
+          className="block hover:text-blue-600 transition"
+        >
+          ยอดขาย
         </Link>
       </aside>
 
       {/* MAIN */}
       <div className="flex-1 p-12">
-        <h2 className="text-3xl font-bold mb-10">
-          ระบบขายสินค้า
-        </h2>
+
+        {/* HEADER */}
+        <div className="flex justify-between items-center mb-10">
+
+          <h2 className="text-3xl font-bold">
+            ระบบขายสินค้า
+          </h2>
+
+          {/* ปุ่มไปหน้ายอดขาย */}
+          <Link
+            href="/payment/history"
+            className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition"
+          >
+            ดูยอดขาย
+          </Link>
+
+        </div>
 
         <form action={handlePayment} className="space-y-8">
 
@@ -201,7 +223,7 @@ export default async function PaymentPage() {
                         <QuantityInput
                           name={`items[${indexKey}][quantity]`}
                           max={product.stock}
-                          price={product.price}   // ✅ สำคัญมาก
+                          price={product.price}
                         />
 
                       </div>

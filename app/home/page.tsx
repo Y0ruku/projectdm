@@ -10,9 +10,11 @@ export const dynamic = "force-dynamic";
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams?: { search?: string };
+  searchParams: Promise<{ search?: string }>;
 }) {
-  const search = searchParams?.search || "";
+
+  const params = await searchParams;
+  const search = params?.search ?? "";
 
   // ======================
   // UPDATE STOCK
@@ -69,9 +71,9 @@ export default async function HomePage({
   let productQuery = "SELECT * FROM products";
   let values: any[] = [];
 
-  if (search) {
+  if (search && search.trim() !== "") {
     productQuery += " WHERE product_name LIKE ?";
-    values.push(`%${search}%`);
+    values.push(`%${search.trim()}%`);
   }
 
   const [productRows] = await db.execute(productQuery, values);
@@ -79,6 +81,7 @@ export default async function HomePage({
 
   return (
     <div className="min-h-screen flex bg-gray-100 text-gray-800">
+
       {/* SIDEBAR */}
       <aside className="w-64 bg-white border-r shadow-sm flex flex-col">
         <div className="px-6 py-5 border-b">
@@ -89,7 +92,6 @@ export default async function HomePage({
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-2 text-sm">
-          {/* Dashboard */}
           <Link
             href="/home"
             className="block px-4 py-2 rounded-lg bg-gray-200 font-medium"
@@ -97,7 +99,6 @@ export default async function HomePage({
             Dashboard
           </Link>
 
-          {/* จ่ายเงิน */}
           <Link
             href="/payment"
             className="block px-4 py-2 rounded-lg hover:bg-gray-100 transition"
@@ -105,7 +106,6 @@ export default async function HomePage({
             จ่ายเงิน
           </Link>
 
-          {/* 🔥 เพิ่มประวัติการจ่ายเงิน */}
           <Link
             href="/payment/history"
             className="block px-4 py-2 rounded-lg hover:bg-gray-100 transition"
@@ -144,6 +144,7 @@ export default async function HomePage({
 
       {/* RIGHT SIDE */}
       <div className="flex-1 flex flex-col">
+
         {/* HEADER */}
         <header className="bg-white border-b shadow-sm px-8 py-4 flex justify-between items-center">
           <h2 className="text-lg font-medium">Dashboard</h2>
@@ -164,21 +165,33 @@ export default async function HomePage({
           </div>
 
           {/* SEARCH */}
-          <form className="mb-8">
+          <form method="GET" className="mb-6 flex gap-3 items-center">
             <input
               type="text"
               name="search"
               placeholder="ค้นหาสินค้า..."
               defaultValue={search}
-              className="w-full md:w-1/2 p-3 border rounded-lg"
+              className="w-full md:w-1/2 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             />
+
+            <button
+              type="submit"
+              className="px-6 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
+            >
+              ค้นหา
+            </button>
           </form>
 
-          <h3 className="text-xl font-semibold mb-6">
-            {search
-              ? `ผลการค้นหา: "${search}"`
-              : "สินค้าทั้งหมด"}
+          {/* TITLE */}
+          <h3 className="text-xl font-semibold mb-1">
+            {search ? "ผลการค้นหา" : "สินค้าทั้งหมด"}
           </h3>
+
+          <p className="text-sm text-gray-500 mb-6">
+            {search
+              ? `คำค้นหา "${search}" • พบ ${products.length} รายการ`
+              : `สินค้าทั้งหมด ${products.length} รายการ`}
+          </p>
 
           {products.length === 0 && (
             <p className="text-gray-500">
@@ -186,6 +199,7 @@ export default async function HomePage({
             </p>
           )}
 
+          {/* PRODUCT GRID */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {products.map((product) => (
               <div
@@ -226,11 +240,13 @@ export default async function HomePage({
               </div>
             ))}
           </div>
+
         </main>
 
         <footer className="bg-white border-t text-center py-4 text-gray-400 text-sm">
           © 2026 Baan Gas. All rights reserved.
         </footer>
+
       </div>
     </div>
   );
