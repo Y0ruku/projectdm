@@ -27,13 +27,16 @@ export default async function PaymentHistoryPage() {
   const history = rows as any[];
 
   // ======================
-  // คำนวณยอดขาย
+  // ยอดขายทั้งหมด
   // ======================
   const totalSales = history.reduce(
     (sum, item) => sum + Number(item.price) * Number(item.quantity),
     0
   );
 
+  // ======================
+  // ยอดขายวันนี้
+  // ======================
   const today = new Date().toDateString();
 
   const todaySales = history
@@ -43,6 +46,40 @@ export default async function PaymentHistoryPage() {
       0
     );
 
+  // ======================
+  // ยอดขายสัปดาห์นี้
+  // ======================
+  const now = new Date();
+
+  const firstDayOfWeek = new Date(now);
+  firstDayOfWeek.setDate(now.getDate() - now.getDay());
+
+  const weekSales = history
+    .filter((item) => new Date(item.created_at) >= firstDayOfWeek)
+    .reduce(
+      (sum, item) => sum + Number(item.price) * Number(item.quantity),
+      0
+    );
+
+  // ======================
+  // ยอดขายเดือนนี้
+  // ======================
+  const monthSales = history
+    .filter((item) => {
+      const d = new Date(item.created_at);
+      return (
+        d.getMonth() === now.getMonth() &&
+        d.getFullYear() === now.getFullYear()
+      );
+    })
+    .reduce(
+      (sum, item) => sum + Number(item.price) * Number(item.quantity),
+      0
+    );
+
+  // ======================
+  // จำนวนบิล
+  // ======================
   const totalBills = new Set(history.map((i) => i.payment_id)).size;
 
   return (
@@ -60,13 +97,13 @@ export default async function PaymentHistoryPage() {
 
       {/* TITLE */}
       <h1 className="text-3xl font-bold mb-8">
-        ประวัติการขาย 
+        ประวัติการขาย
       </h1>
 
       {/* ======================
           SUMMARY BOX
       ====================== */}
-      <div className="grid md:grid-cols-3 gap-6 mb-10">
+      <div className="grid md:grid-cols-5 gap-6 mb-10">
 
         <div className="bg-white p-6 rounded-xl shadow border">
           <p className="text-gray-500 text-sm">ยอดขายทั้งหมด</p>
@@ -79,6 +116,20 @@ export default async function PaymentHistoryPage() {
           <p className="text-gray-500 text-sm">ยอดขายวันนี้</p>
           <h2 className="text-2xl font-bold text-blue-600">
             {todaySales.toLocaleString()} บาท
+          </h2>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow border">
+          <p className="text-gray-500 text-sm">ยอดขายสัปดาห์นี้</p>
+          <h2 className="text-2xl font-bold text-purple-600">
+            {weekSales.toLocaleString()} บาท
+          </h2>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow border">
+          <p className="text-gray-500 text-sm">ยอดขายเดือนนี้</p>
+          <h2 className="text-2xl font-bold text-orange-600">
+            {monthSales.toLocaleString()} บาท
           </h2>
         </div>
 
